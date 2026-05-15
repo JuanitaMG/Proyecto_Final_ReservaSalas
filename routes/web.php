@@ -13,11 +13,7 @@ use App\Http\Controllers\BlockedSlotController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\AvailabilityController;
 
-/*
-|--------------------------------------------------------------------------
-| RUTA PRINCIPAL
-|--------------------------------------------------------------------------
-*/
+
 
 Route::get('/', function () {
 
@@ -25,18 +21,6 @@ Route::get('/', function () {
 
 });
 
-/*
-|--------------------------------------------------------------------------
-| RUTAS PÚBLICAS
-|--------------------------------------------------------------------------
-| Estas rutas se pueden ver sin iniciar sesión
-*/
-
-/*
-|--------------------------------------------------------------------------
-| SALAS PÚBLICAS
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/spaces', [
 
@@ -45,11 +29,7 @@ Route::get('/spaces', [
 
 ]);
 
-/*
-|--------------------------------------------------------------------------
-| CALENDARIO PÚBLICO
-|--------------------------------------------------------------------------
-*/
+
 
 Route::get('/calendar', [
 
@@ -58,11 +38,7 @@ Route::get('/calendar', [
 
 ]);
 
-/*
-|--------------------------------------------------------------------------
-| DISPONIBILIDAD EN TIEMPO REAL
-|--------------------------------------------------------------------------
-*/
+
 
 Route::get('/availability', [
 
@@ -71,55 +47,34 @@ Route::get('/availability', [
 
 ]);
 
-/*
-|--------------------------------------------------------------------------
-| RUTAS AUTENTICADAS
-|--------------------------------------------------------------------------
-*/
+
 
 Route::middleware(['auth'])->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | REDIRECCIÓN DASHBOARD
-    |--------------------------------------------------------------------------
-    */
+   
 
     Route::get('/dashboard', function () {
 
-        // 👑 ADMIN
+        
         if (auth()->user()->role === 'admin') {
 
             return redirect('/admin');
 
         }
 
-        // 👤 USER
+        
         return redirect('/spaces');
 
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | RUTAS SOLO ADMIN
-    |--------------------------------------------------------------------------
-    */
+
 
     Route::middleware(['admin'])->group(function () {
 
-        /*
-        |--------------------------------------------------------------------------
-        | PANEL ADMIN
-        |--------------------------------------------------------------------------
-        */
-
+     
         Route::get('/admin', function () {
 
-            /*
-            |--------------------------------------------------------------------------
-            | ACTIVIDAD RECIENTE
-            |--------------------------------------------------------------------------
-            */
+            
 
             $recentReservations = Reservation::with([
                 'space',
@@ -129,11 +84,7 @@ Route::middleware(['auth'])->group(function () {
             ->take(5)
             ->get();
 
-            /*
-            |--------------------------------------------------------------------------
-            | RESERVAS POR SALA
-            |--------------------------------------------------------------------------
-            */
+           
 
             $reservationsBySpace = Space::withCount('reservations')
                 ->get()
@@ -149,31 +100,19 @@ Route::middleware(['auth'])->group(function () {
 
                 });
 
-            /*
-            |--------------------------------------------------------------------------
-            | SALA MÁS USADA
-            |--------------------------------------------------------------------------
-            */
+           
 
             $topSpace = Space::withCount('reservations')
                 ->orderByDesc('reservations_count')
                 ->first();
 
-            /*
-            |--------------------------------------------------------------------------
-            | USUARIO MÁS ACTIVO
-            |--------------------------------------------------------------------------
-            */
+         
 
             $topUser = User::withCount('reservations')
                 ->orderByDesc('reservations_count')
                 ->first();
 
-            /*
-            |--------------------------------------------------------------------------
-            | PORCENTAJE APROBADAS
-            |--------------------------------------------------------------------------
-            */
+           
 
             $approvalRate = Reservation::count() > 0
 
@@ -190,11 +129,7 @@ Route::middleware(['auth'])->group(function () {
 
                 : 0;
 
-            /*
-            |--------------------------------------------------------------------------
-            | DASHBOARD
-            |--------------------------------------------------------------------------
-            */
+       
 
             return Inertia::render('Admin/Dashboard', [
 
@@ -238,13 +173,7 @@ Route::middleware(['auth'])->group(function () {
 
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | CRUD SALAS
-        |--------------------------------------------------------------------------
-        */
-
-        // CREAR
+      
         Route::get('/spaces/create', [
 
             SpaceController::class,
@@ -252,7 +181,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // GUARDAR
+      
         Route::post('/spaces', [
 
             SpaceController::class,
@@ -260,7 +189,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // EDITAR
+        
         Route::get('/spaces/{id}/edit', [
 
             SpaceController::class,
@@ -268,7 +197,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // ACTUALIZAR
+        
         Route::put('/spaces/{id}', [
 
             SpaceController::class,
@@ -276,7 +205,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // ELIMINAR
+        
         Route::delete('/spaces/{id}', [
 
             SpaceController::class,
@@ -284,13 +213,8 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | APROBAR / RECHAZAR / CANCELAR RESERVAS
-        |--------------------------------------------------------------------------
-        */
 
-        // APROBAR
+        
         Route::post('/reservations/{id}/approve', [
 
             ReservationController::class,
@@ -298,7 +222,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // RECHAZAR
+        
         Route::post('/reservations/{id}/reject', [
 
             ReservationController::class,
@@ -306,7 +230,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // CANCELAR
+        
         Route::post('/reservations/{id}/cancel', [
 
             ReservationController::class,
@@ -314,13 +238,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | BLOQUEOS
-        |--------------------------------------------------------------------------
-        */
-
-        // LISTAR
+       
         Route::get('/blocked-slots', [
 
             BlockedSlotController::class,
@@ -328,7 +246,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // CREAR
+        
         Route::post('/blocked-slots', [
 
             BlockedSlotController::class,
@@ -336,7 +254,7 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
-        // ELIMINAR
+        
         Route::delete('/blocked-slots/{id}', [
 
             BlockedSlotController::class,
@@ -344,15 +262,34 @@ Route::middleware(['auth'])->group(function () {
 
         ]);
 
+        Route::get('/availabilities', [
+
+            AvailabilityController::class,
+            'index'
+
+        ]);
+
+      
+        Route::post('/availabilities', [
+
+            AvailabilityController::class,
+            'store'
+
+        ]);
+
+  
+        Route::delete('/availabilities/{id}', [
+
+            AvailabilityController::class,
+            'destroy'
+
+        ]);
+
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | RESERVAS (SOLO LOGUEADOS)
-    |--------------------------------------------------------------------------
-    */
+    
 
-    // LISTAR
+   
     Route::get('/reservations', [
 
         ReservationController::class,
@@ -360,7 +297,7 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    // FORMULARIO CREAR
+    
     Route::get('/reservations/create', [
 
         ReservationController::class,
@@ -368,7 +305,7 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    // GUARDAR
+   
     Route::post('/reservations', [
 
         ReservationController::class,
@@ -376,12 +313,7 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | VERIFICAR DISPONIBILIDAD
-    |--------------------------------------------------------------------------
-    */
-
+   
     Route::post('/reservations/check', [
 
         ReservationController::class,
@@ -389,11 +321,7 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | EXPORTAR PDF
-    |--------------------------------------------------------------------------
-    */
+  
 
     Route::get('/reservations/pdf', [
 
@@ -402,13 +330,7 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | CRUD RESERVAS
-    |--------------------------------------------------------------------------
-    */
-
-    // EDITAR
+  
     Route::get('/reservations/{id}/edit', [
 
         ReservationController::class,
@@ -416,7 +338,7 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    // ACTUALIZAR
+   
     Route::put('/reservations/{id}', [
 
         ReservationController::class,
@@ -424,7 +346,6 @@ Route::middleware(['auth'])->group(function () {
 
     ]);
 
-    // ELIMINAR
     Route::delete('/reservations/{id}', [
 
         ReservationController::class,
@@ -433,3 +354,12 @@ Route::middleware(['auth'])->group(function () {
     ]);
 
 });
+
+
+
+Route::get('/spaces/{slug}', [
+
+    SpaceController::class,
+    'show'
+
+]);

@@ -8,7 +8,9 @@ const props = defineProps({
 
     spaces: Array,
 
-    selectedDate: String
+    selectedDate: String,
+
+    selectedSpace: [String, Number]
 
 })
 
@@ -20,7 +22,7 @@ const props = defineProps({
 
 const form = useForm({
 
-    space_id: '',
+    space_id: props.selectedSpace || '',
 
     date: props.selectedDate || '',
 

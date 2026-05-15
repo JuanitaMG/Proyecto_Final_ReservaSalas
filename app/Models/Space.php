@@ -10,7 +10,7 @@ use App\Models\Reservation;
 
 class Space extends Model
 {
-    
+   
 
     protected $fillable = [
 
@@ -20,10 +20,11 @@ class Space extends Model
         'description',
         'price_per_hour',
         'is_active',
+        'image',
+
 
     ];
 
-   
 
     public function reservations()
     {

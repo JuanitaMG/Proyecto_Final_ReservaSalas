@@ -21,7 +21,7 @@ class ReservationController extends Controller
 
     public function index()
     {
-        // 👑 ADMIN VE TODAS
+       
         if (auth()->user()->role === 'admin') {
 
             $reservations = Reservation::with([
@@ -33,7 +33,7 @@ class ReservationController extends Controller
 
         }
 
-        
+       
         else {
 
             $reservations = Reservation::with([
@@ -53,7 +53,7 @@ class ReservationController extends Controller
         ]);
     }
 
-    
+   
 
     public function create(Request $request)
     {
@@ -61,12 +61,14 @@ class ReservationController extends Controller
 
             'spaces' => Space::all(),
 
-            'selectedDate' => $request->date
+            'selectedDate' => $request->date,
+
+            'selectedSpace' => $request->space
 
         ]);
     }
 
-   
+
 
     public function checkAvailability(Request $request)
     {
@@ -89,7 +91,7 @@ class ReservationController extends Controller
 
             ->exists();
 
-       
+        
 
         $blockedExists = BlockedSlot::where('space_id', $request->space_id)
 
@@ -115,7 +117,8 @@ class ReservationController extends Controller
         ]);
     }
 
-   
+    
+
     public function store(Request $request)
     {
         $request->validate([
@@ -130,7 +133,7 @@ class ReservationController extends Controller
 
         ]);
 
-       
+        
 
         $exists = Reservation::where('space_id', $request->space_id)
 
@@ -188,7 +191,7 @@ class ReservationController extends Controller
 
         }
 
-       
+        
 
         $reservation = Reservation::create([
 
@@ -206,7 +209,7 @@ class ReservationController extends Controller
 
         ]);
 
-     
+       
 
         Mail::to(auth()->user()->email)->send(
 
@@ -224,13 +227,13 @@ class ReservationController extends Controller
             ->with('success', 'Reserva creada correctamente 🎉');
     }
 
-    
+  
 
     public function edit($id)
     {
         $reservation = Reservation::findOrFail($id);
 
-       
+        
         if (auth()->user()->role !== 'admin') {
 
             abort(403);
@@ -247,6 +250,7 @@ class ReservationController extends Controller
     }
 
    
+
     public function update(Request $request, $id)
     {
         $reservation = Reservation::findOrFail($id);
@@ -350,7 +354,7 @@ class ReservationController extends Controller
             ->with('success', 'Reserva actualizada ✨');
     }
 
-    
+   
 
     public function destroy($id)
     {
@@ -369,7 +373,7 @@ class ReservationController extends Controller
             ->with('success', 'Reserva eliminada 🗑️');
     }
 
-    
+   
     public function approve($id)
     {
         
@@ -387,7 +391,8 @@ class ReservationController extends Controller
 
         ]);
 
-       
+        
+
         Mail::to($reservation->user->email)->send(
 
             new ReservationStatusMail(
@@ -407,7 +412,7 @@ class ReservationController extends Controller
 
     public function reject($id)
     {
-        // 👑 SOLO ADMIN
+        
         if (auth()->user()->role !== 'admin') {
 
             abort(403);
@@ -439,7 +444,7 @@ class ReservationController extends Controller
         return back()->with('success', 'Reserva rechazada ❌');
     }
 
-    
+
 
     public function cancel($id)
     {
@@ -480,7 +485,7 @@ class ReservationController extends Controller
         );
     }
 
-    
+  
 
     public function calendar()
     {
@@ -523,7 +528,7 @@ class ReservationController extends Controller
         ]);
     }
 
-    
+   
 
     public function exportPdf()
     {

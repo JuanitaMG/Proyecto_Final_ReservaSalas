@@ -1,7 +1,13 @@
 <script setup>
 
+import { ref } from 'vue'
+
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Link, router } from '@inertiajs/vue3'
+
+import {
+    Link,
+    router
+} from '@inertiajs/vue3'
 
 defineProps({
 
@@ -11,17 +17,41 @@ defineProps({
 
 /*
 |--------------------------------------------------------------------------
-| ELIMINAR
+| MODAL ELIMINAR
 |--------------------------------------------------------------------------
 */
 
-const deleteSpace = (id) => {
+const showDeleteModal = ref(false)
 
-    if (confirm('¿Eliminar esta sala?')) {
+const selectedSpace = ref(null)
 
-        router.delete(`/spaces/${id}`)
+const openDeleteModal = (space) => {
 
-    }
+    selectedSpace.value = space
+
+    showDeleteModal.value = true
+
+}
+
+const closeDeleteModal = () => {
+
+    showDeleteModal.value = false
+
+    selectedSpace.value = null
+
+}
+
+const deleteSpace = () => {
+
+    router.delete(`/spaces/${selectedSpace.value.id}`, {
+
+        onSuccess: () => {
+
+            closeDeleteModal()
+
+        }
+
+    })
 
 }
 
@@ -80,9 +110,11 @@ const deleteSpace = (id) => {
                         <!-- IMAGE -->
                         <img
                             v-if="space.image"
-                            :src="space.image"
+                            :src="space.image.startsWith('http')
+                                ? space.image
+                                : `/storage/${space.image}`"
                             :alt="space.name"
-                            class="w-full h-full object-cover"
+                            class="w-full h-full object-cover hover:scale-105 transition duration-500"
                         >
 
                         <!-- FALLBACK -->
@@ -94,6 +126,9 @@ const deleteSpace = (id) => {
                             🏢
 
                         </div>
+
+                        <!-- OVERLAY -->
+                        <div class="absolute inset-0 bg-black/10" />
 
                         <!-- STATUS -->
                         <div class="absolute top-4 right-4">
@@ -208,15 +243,25 @@ const deleteSpace = (id) => {
                         <!-- ACTIONS -->
                         <div class="mt-8 space-y-3">
 
+                            <!-- VER DETALLE -->
+                            <Link
+                                :href="`/spaces/${space.slug}`"
+                                class="block text-center bg-indigo-600 text-white py-3 rounded-2xl hover:bg-indigo-700 transition duration-300 font-semibold shadow-md"
+                            >
+
+                                🔍 Ver detalles
+
+                            </Link>
+
                             <!-- RESERVAR -->
                             <template v-if="$page.props.auth?.user">
 
                                 <Link
                                     href="/reservations/create"
-                                    class="block text-center bg-indigo-600 text-white py-3 rounded-2xl hover:bg-indigo-700 transition duration-300 font-semibold shadow-md"
+                                    class="block text-center border border-indigo-200 text-indigo-600 py-3 rounded-2xl hover:bg-indigo-50 transition duration-300 font-semibold"
                                 >
 
-                                    Reservar sala
+                                    📅 Reservar sala
 
                                 </Link>
 
@@ -253,7 +298,7 @@ const deleteSpace = (id) => {
 
                                     <!-- DELETE -->
                                     <button
-                                        @click="deleteSpace(space.id)"
+                                        @click="openDeleteModal(space)"
                                         class="bg-red-100 text-red-600 py-3 rounded-2xl hover:bg-red-200 transition font-semibold"
                                     >
 
@@ -290,6 +335,70 @@ const deleteSpace = (id) => {
                 <p class="text-gray-400">
                     Crea una nueva sala para comenzar
                 </p>
+
+            </div>
+
+        </div>
+
+        <!-- MODAL ELIMINAR -->
+        <div
+            v-if="showDeleteModal"
+            class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        >
+
+            <div
+                class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8"
+            >
+
+                <!-- ICON -->
+                <div
+                    class="w-20 h-20 mx-auto rounded-full bg-red-100 flex items-center justify-center text-4xl mb-6"
+                >
+                    🗑️
+                </div>
+
+                <!-- TITLE -->
+                <h2 class="text-3xl font-black text-gray-800 text-center mb-3">
+                    Eliminar sala
+                </h2>
+
+                <!-- TEXT -->
+                <p class="text-gray-500 text-center leading-relaxed mb-8">
+
+                    ¿Seguro que deseas eliminar
+
+                    <span class="font-bold text-gray-700">
+                        {{ selectedSpace?.name }}
+                    </span>?
+
+                    Esta acción no se puede deshacer.
+
+                </p>
+
+                <!-- BUTTONS -->
+                <div class="flex gap-4">
+
+                    <!-- CANCEL -->
+                    <button
+                        @click="closeDeleteModal"
+                        class="flex-1 py-3 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition"
+                    >
+
+                        Cancelar
+
+                    </button>
+
+                    <!-- DELETE -->
+                    <button
+                        @click="deleteSpace"
+                        class="flex-1 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg transition"
+                    >
+
+                        Sí, eliminar
+
+                    </button>
+
+                </div>
 
             </div>
 
