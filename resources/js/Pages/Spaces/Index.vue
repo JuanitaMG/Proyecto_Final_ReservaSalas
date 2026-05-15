@@ -257,7 +257,7 @@ const deleteSpace = () => {
                             <template v-if="$page.props.auth?.user">
 
                                 <Link
-                                    href="/reservations/create"
+                                    :href="`/reservations/create?space=${space.id}`"
                                     class="block text-center border border-indigo-200 text-indigo-600 py-3 rounded-2xl hover:bg-indigo-50 transition duration-300 font-semibold"
                                 >
 

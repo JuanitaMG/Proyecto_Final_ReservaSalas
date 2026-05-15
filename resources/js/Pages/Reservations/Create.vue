@@ -1,5 +1,7 @@
 <script setup>
 
+import { computed } from 'vue'
+
 import { useForm } from '@inertiajs/vue3'
 
 import AdminLayout from '@/Layouts/AdminLayout.vue'
@@ -29,6 +31,22 @@ const form = useForm({
     start_time: '',
 
     end_time: ''
+
+})
+
+/*
+|--------------------------------------------------------------------------
+| SALA SELECCIONADA
+|--------------------------------------------------------------------------
+*/
+
+const selectedSpaceData = computed(() => {
+
+    return props.spaces.find(
+
+        (space) => space.id == form.space_id
+
+    )
 
 })
 
@@ -90,6 +108,83 @@ const form = useForm({
                             </option>
 
                         </select>
+
+                        <!-- INFO SALA -->
+                        <div
+                            v-if="selectedSpaceData"
+                            class="mt-4 bg-indigo-50 border border-indigo-100 rounded-2xl p-5"
+                        >
+
+                            <div class="flex items-center gap-4">
+
+                                <!-- IMAGE -->
+                                <img
+                                    v-if="selectedSpaceData.image"
+                                    :src="selectedSpaceData.image.startsWith('http')
+                                        ? selectedSpaceData.image
+                                        : `/storage/${selectedSpaceData.image}`"
+                                    :alt="selectedSpaceData.name"
+                                    class="w-24 h-24 rounded-2xl object-cover"
+                                >
+
+                                <!-- INFO -->
+                                <div>
+
+                                    <h3 class="text-xl font-black text-gray-800">
+                                        {{ selectedSpaceData.name }}
+                                    </h3>
+
+                                    <p class="text-gray-500 mt-1">
+                                        {{ selectedSpaceData.description }}
+                                    </p>
+
+                                    <div class="flex gap-5 mt-3">
+
+                                        <div>
+
+                                            <p class="text-xs uppercase text-gray-400">
+                                                Capacidad
+                                            </p>
+
+                                            <p class="font-bold text-gray-700">
+                                                👥 {{ selectedSpaceData.capacity }}
+                                            </p>
+
+                                        </div>
+
+                                        <div>
+
+                                            <p class="text-xs uppercase text-gray-400">
+                                                Precio
+                                            </p>
+
+                                            <p class="font-bold text-gray-700">
+
+                                                💰
+                                                {{
+                                                    Number(
+                                                        selectedSpaceData.price_per_hour
+                                                    ).toLocaleString(
+                                                        'es-CO',
+                                                        {
+                                                            style: 'currency',
+                                                            currency: 'COP',
+                                                            minimumFractionDigits: 0
+                                                        }
+                                                    )
+                                                }}
+
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                         <!-- ERROR -->
                         <p

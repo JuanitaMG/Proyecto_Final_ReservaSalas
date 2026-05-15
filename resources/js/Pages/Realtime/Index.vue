@@ -91,12 +91,78 @@ const deleteAvailability = (id) => {
                 <div
                     v-for="space in spaces"
                     :key="space.id"
-                    class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition duration-300"
+                    class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-1 transition duration-300"
                 >
 
-                    <!-- TOP -->
-                    <div class="flex justify-between items-start">
+                    <!-- IMAGE -->
+                    <div class="relative h-44 overflow-hidden">
 
+                        <!-- IMAGE -->
+                        <img
+                            v-if="space.image"
+                            :src="space.image.startsWith('http')
+                                ? space.image
+                                : `/storage/${space.image}`"
+                            :alt="space.name"
+                            class="w-full h-full object-cover"
+                        >
+
+                        <!-- FALLBACK -->
+                        <div
+                            v-else
+                            class="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white text-6xl"
+                        >
+
+                            🏢
+
+                        </div>
+
+                        <!-- OVERLAY -->
+                        <div class="absolute inset-0 bg-black/10" />
+
+                        <!-- STATUS -->
+                        <div class="absolute top-4 right-4">
+
+                            <!-- DISPONIBLE -->
+                            <span
+                                v-if="space.status === 'available'"
+                                class="bg-green-100/95 backdrop-blur text-green-700 px-4 py-2 rounded-full text-sm font-bold shadow"
+                            >
+                                🟢 Disponible
+                            </span>
+
+                            <!-- OCUPADA -->
+                            <span
+                                v-else-if="space.status === 'busy'"
+                                class="bg-red-100/95 backdrop-blur text-red-700 px-4 py-2 rounded-full text-sm font-bold shadow"
+                            >
+                                🔴 Sala ocupada
+                            </span>
+
+                            <!-- INACTIVA -->
+                            <span
+                                v-else-if="space.status === 'inactive'"
+                                class="bg-red-100/95 backdrop-blur text-red-700 px-4 py-2 rounded-full text-sm font-bold shadow"
+                            >
+                                ❌ No disponible
+                            </span>
+
+                            <!-- PRÓXIMA -->
+                            <span
+                                v-else-if="space.status === 'soon'"
+                                class="bg-yellow-100/95 backdrop-blur text-yellow-700 px-4 py-2 rounded-full text-sm font-bold shadow"
+                            >
+                                🟡 Próxima reserva
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CONTENT -->
+                    <div class="p-8">
+
+                        <!-- TOP -->
                         <div>
 
                             <h2 class="text-2xl font-bold text-gray-800">
@@ -109,76 +175,68 @@ const deleteAvailability = (id) => {
 
                         </div>
 
-                        <!-- STATUS -->
-                        <div>
+                        <!-- INFO -->
+                        <div class="mt-8">
 
                             <!-- DISPONIBLE -->
-                            <span
-                                v-if="space.status === 'available'"
-                                class="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-bold"
-                            >
-                                🟢 Disponible
-                            </span>
+                            <div v-if="space.status === 'available'">
+
+                                <p class="text-gray-700 text-lg font-semibold">
+                                    Libre ahora
+                                </p>
+
+                                <p class="text-gray-400 mt-2">
+                                    Disponible para reservar
+                                </p>
+
+                            </div>
 
                             <!-- OCUPADA -->
-                            <span
-                                v-else-if="space.status === 'busy'"
-                                class="bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-bold"
-                            >
-                                🔴 Ocupada
-                            </span>
+                            <div v-else-if="space.status === 'busy'">
+
+                                <p class="text-red-600 text-lg font-bold">
+                                    Sala ocupada
+                                </p>
+
+                                <p class="text-gray-500 mt-2">
+
+                                    Ocupada desde
+
+                                    {{ space.start_time }}
+
+                                    hasta
+
+                                    {{ space.end_time }}
+
+                                </p>
+
+                            </div>
+
+                            <!-- INACTIVA -->
+                            <div v-else-if="space.status === 'inactive'">
+
+                                <p class="text-red-600 text-lg font-bold">
+                                    Sala deshabilitada
+                                </p>
+
+                                <p class="text-gray-500 mt-2">
+                                    No disponible actualmente
+                                </p>
+
+                            </div>
 
                             <!-- PRÓXIMA -->
-                            <span
-                                v-else-if="space.status === 'soon'"
-                                class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full text-sm font-bold"
-                            >
-                                🟡 Próxima reserva
-                            </span>
+                            <div v-else-if="space.status === 'soon'">
 
-                        </div>
+                                <p class="text-yellow-600 text-lg font-bold">
+                                    Reserva próxima
+                                </p>
 
-                    </div>
+                                <p class="text-gray-500 mt-2">
+                                    Inicia pronto
+                                </p>
 
-                    <!-- INFO -->
-                    <div class="mt-8">
-
-                        <!-- DISPONIBLE -->
-                        <div v-if="space.status === 'available'">
-
-                            <p class="text-gray-700 text-lg font-semibold">
-                                Libre ahora
-                            </p>
-
-                            <p class="text-gray-400 mt-2">
-                                Disponible para reservar
-                            </p>
-
-                        </div>
-
-                        <!-- OCUPADA -->
-                        <div v-else-if="space.status === 'busy'">
-
-                            <p class="text-gray-700 text-lg font-semibold">
-                                Sala ocupada
-                            </p>
-
-                            <p class="text-gray-400 mt-2">
-                                {{ space.start_time }} - {{ space.end_time }}
-                            </p>
-
-                        </div>
-
-                        <!-- PRÓXIMA -->
-                        <div v-else-if="space.status === 'soon'">
-
-                            <p class="text-gray-700 text-lg font-semibold">
-                                Reserva próxima
-                            </p>
-
-                            <p class="text-gray-400 mt-2">
-                                Inicia pronto
-                            </p>
+                            </div>
 
                         </div>
 

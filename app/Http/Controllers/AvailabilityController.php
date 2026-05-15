@@ -12,13 +12,17 @@ use Inertia\Inertia;
 
 class AvailabilityController extends Controller
 {
+
     
 
     public function index()
     {
+
        
 
         $spaces = Space::all()->map(function ($space) {
+
+          
 
             $activeReservation = Reservation::where('space_id', $space->id)
 
@@ -32,6 +36,51 @@ class AvailabilityController extends Controller
 
                 ->first();
 
+            
+
+            $nextReservation = Reservation::where('space_id', $space->id)
+
+                ->where('date', now()->toDateString())
+
+                ->where('status', 'approved')
+
+                ->whereTime('start_time', '>', now()->format('H:i:s'))
+
+                ->whereTime(
+                    'start_time',
+                    '<=',
+                    now()->copy()->addMinutes(30)->format('H:i:s')
+                )
+
+                ->first();
+
+           
+
+            $status = 'available';
+
+            // SALA INACTIVA
+            if (!$space->is_active) {
+
+                $status = 'inactive';
+
+            }
+
+            // SALA OCUPADA
+            elseif ($activeReservation) {
+
+                $status = 'busy';
+
+            }
+
+            // PRÓXIMA RESERVA
+            elseif ($nextReservation) {
+
+                $status = 'soon';
+
+            }
+
+            
+
             return [
 
                 'id' => $space->id,
@@ -40,25 +89,30 @@ class AvailabilityController extends Controller
 
                 'location' => $space->location,
 
-                'status' => $activeReservation
-                    ? 'busy'
-                    : 'available',
+                // IMAGEN
+                'image' => $space->image,
 
-                'start_time' => $activeReservation?->start_time,
+                // STATUS
+                'status' => $status,
 
-                'end_time' => $activeReservation?->end_time,
+                // HORARIOS
+                'start_time' => $activeReservation?->start_time
+                    ?? $nextReservation?->start_time,
+
+                'end_time' => $activeReservation?->end_time
+                    ?? $nextReservation?->end_time,
 
             ];
 
         });
 
-      
+    
 
         $availabilities = Availability::with('space')
             ->latest()
             ->get();
 
-        
+       
 
         return Inertia::render('Realtime/Index', [
 
@@ -71,11 +125,10 @@ class AvailabilityController extends Controller
         ]);
     }
 
-   
+    
 
     public function store(Request $request)
     {
-        
 
         $request->validate([
 
@@ -88,8 +141,6 @@ class AvailabilityController extends Controller
             'end_time' => 'required|after:start_time',
 
         ]);
-
-       
 
         Availability::create([
 
@@ -111,10 +162,11 @@ class AvailabilityController extends Controller
         );
     }
 
-    
+   
 
     public function destroy($id)
     {
+
         $availability = Availability::findOrFail($id);
 
         $availability->delete();
